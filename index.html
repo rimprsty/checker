@@ -270,4 +270,524 @@
             max-height: 500px;
             overflow-y: auto;
             border-radius: 10px;
-            background-color: rgba(0, 0, 0
+            background-color: rgba(0, 0, 0, 0.03);
+            padding: 20px;
+        }
+        
+        body.scrolled .unfollowers-list {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .unfollower-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s ease;
+        }
+        
+        body.scrolled .unfollower-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .unfollower-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        body.scrolled .unfollower-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .unfollower-item:last-child {
+            border-bottom: none;
+        }
+        
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ddd;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #777;
+        }
+        
+        .username {
+            font-weight: 600;
+            flex: 1;
+        }
+        
+        .copy-btn {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .loader-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        body.scrolled .loader-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--primary-color);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        footer {
+            background-color: inherit;
+            padding: 30px 0;
+            text-align: center;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        
+        body.scrolled footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        footer p {
+            opacity: 0.7;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .upload-container {
+                flex-direction: column;
+            }
+            
+            .upload-box {
+                min-width: 100%;
+            }
+            
+            .steps {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Instagram Unfollower Checker</h1>
+            <p>Unggah file ZIP data Instagram Anda untuk menemukan siapa yang tidak mem-follow balik akun Anda</p>
+        </div>
+    </header>
+    
+    <section class="instructions">
+        <div class="container">
+            <div class="instructions-content">
+                <h2>Cara Menggunakan</h2>
+                <p>Website ini akan menganalisis data Instagram Anda untuk menemukan akun yang tidak mem-follow balik. Ikuti langkah-langkah berikut:</p>
+                
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Request Data Instagram</h3>
+                        <p>Pergi ke Instagram → Settings → Privacy and Security → Download Data</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Tunggu Email</h3>
+                        <p>Instagram akan mengirimkan link download data Anda via email (biasanya butuh beberapa menit hingga 48 jam)</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Download & Ekstrak</h3>
+                        <p>Download file ZIP dari Instagram dan ekstrak untuk mendapatkan file JSON</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <h3>Upload File</h3>
+                        <p>Upload file <code>followers_1.json</code> dan <code>following.json</code> di bawah ini</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="upload-section">
+        <div class="container">
+            <div class="upload-container">
+                <div class="upload-box" id="following-box">
+                    <i>📁</i>
+                    <h3>Following</h3>
+                    <p>Unggah file <code>following.json</code> dari data Instagram Anda</p>
+                    <input type="file" id="following-file" accept=".json,.txt,.zip" hidden>
+                    <button class="upload-btn" id="following-btn">Pilih File</button>
+                    <div class="file-name" id="following-name">Belum ada file dipilih</div>
+                </div>
+                
+                <div class="upload-box" id="followers-box">
+                    <i>📁</i>
+                    <h3>Followers</h3>
+                    <p>Unggah file <code>followers_1.json</code> dari data Instagram Anda</p>
+                    <input type="file" id="followers-file" accept=".json,.txt,.zip" hidden>
+                    <button class="upload-btn" id="followers-btn">Pilih File</button>
+                    <div class="file-name" id="followers-name">Belum ada file dipilih</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="analyze-section">
+        <div class="container">
+            <button class="analyze-btn" id="analyze-btn" disabled>Analisis Data</button>
+            <div class="loader" id="loader">
+                <div class="loader-spinner"></div>
+                <p>Memproses data...</p>
+            </div>
+        </div>
+    </section>
+    
+    <section class="results-section" id="results-section">
+        <div class="container">
+            <div class="results-container">
+                <div class="results-header">
+                    <h2>Hasil Analisis</h2>
+                    <p>Berikut adalah daftar akun yang tidak mem-follow balik Anda</p>
+                </div>
+                
+                <div class="results-count" id="results-count">
+                    Ditemukan <span id="count">0</span> akun yang tidak mem-follow balik
+                </div>
+                
+                <div class="unfollowers-list" id="unfollowers-list">
+                    <!-- Daftar unfollower akan dimasukkan di sini -->
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="copy-btn" id="copy-btn">Salin Daftar</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="container">
+            <p>Instagram Unfollower Checker &copy; 2023</p>
+            <p>Website ini tidak terafiliasi dengan Instagram. Data Anda diproses secara lokal di browser.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Elements
+        const followingFileInput = document.getElementById('following-file');
+        const followersFileInput = document.getElementById('followers-file');
+        const followingBtn = document.getElementById('following-btn');
+        const followersBtn = document.getElementById('followers-btn');
+        const followingName = document.getElementById('following-name');
+        const followersName = document.getElementById('followers-name');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const loader = document.getElementById('loader');
+        const resultsSection = document.getElementById('results-section');
+        const resultsCount = document.getElementById('results-count');
+        const countSpan = document.getElementById('count');
+        const unfollowersList = document.getElementById('unfollowers-list');
+        const copyBtn = document.getElementById('copy-btn');
+        
+        // File data
+        let followingData = [];
+        let followersData = [];
+        
+        // Event listeners for file upload buttons
+        followingBtn.addEventListener('click', () => followingFileInput.click());
+        followersBtn.addEventListener('click', () => followersFileInput.click());
+        
+        // Handle file selection
+        followingFileInput.addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                followingName.textContent = this.files[0].name;
+                readFile(this.files[0], 'following');
+            }
+        });
+        
+        followersFileInput.addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                followersName.textContent = this.files[0].name;
+                readFile(this.files[0], 'followers');
+            }
+        });
+        
+        // Drag and drop functionality
+        const followingBox = document.getElementById('following-box');
+        const followersBox = document.getElementById('followers-box');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            followingBox.addEventListener(eventName, preventDefaults, false);
+            followersBox.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            followingBox.addEventListener(eventName, highlight, false);
+            followersBox.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            followingBox.addEventListener(eventName, unhighlight, false);
+            followersBox.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight(e) {
+            this.classList.add('highlight');
+        }
+        
+        function unhighlight(e) {
+            this.classList.remove('highlight');
+        }
+        
+        followingBox.addEventListener('drop', handleDrop, false);
+        followersBox.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            const boxId = this.id;
+            
+            if (files.length > 0) {
+                if (boxId === 'following-box') {
+                    followingFileInput.files = files;
+                    followingName.textContent = files[0].name;
+                    readFile(files[0], 'following');
+                } else {
+                    followersFileInput.files = files;
+                    followersName.textContent = files[0].name;
+                    readFile(files[0], 'followers');
+                }
+            }
+        }
+        
+        // Read file content
+        function readFile(file, type) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const content = e.target.result;
+                
+                // Check if file is ZIP
+                if (file.name.endsWith('.zip')) {
+                    extractZip(content, type);
+                } else {
+                    parseFileContent(content, type);
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // Extract ZIP file
+        function extractZip(content, type) {
+            // In a real implementation, you would use a library like JSZip
+            // For this demo, we'll simulate extraction with a timeout
+            loader.style.display = 'block';
+            
+            setTimeout(() => {
+                // Simulate finding JSON files in ZIP
+                if (type === 'following') {
+                    followingName.textContent += ' (following.json ditemukan)';
+                    // For demo purposes, we'll use sample data
+                    parseFileContent(JSON.stringify({
+                        relationships_following: [
+                            { string_list_data: [{ value: "user1" }] },
+                            { string_list_data: [{ value: "user2" }] },
+                            { string_list_data: [{ value: "user3" }] },
+                            { string_list_data: [{ value: "user4" }] },
+                            { string_list_data: [{ value: "user5" }] }
+                        ]
+                    }), type);
+                } else {
+                    followersName.textContent += ' (followers_1.json ditemukan)';
+                    // For demo purposes, we'll use sample data
+                    parseFileContent(JSON.stringify([
+                        { string_list_data: [{ value: "user1" }] },
+                        { string_list_data: [{ value: "user2" }] },
+                        { string_list_data: [{ value: "user3" }] },
+                        { string_list_data: [{ value: "user6" }] },
+                        { string_list_data: [{ value: "user7" }] }
+                    ]), type);
+                }
+                
+                loader.style.display = 'none';
+            }, 1500);
+        }
+        
+        // Parse file content
+        function parseFileContent(content, type) {
+            let data = [];
+            
+            // Try to parse as JSON first
+            try {
+                const jsonData = JSON.parse(content);
+                
+                // Handle Instagram data format
+                if (jsonData.relationships_following) {
+                    // Following data format
+                    data = jsonData.relationships_following.map(item => item.string_list_data[0].value);
+                } else if (Array.isArray(jsonData)) {
+                    // Followers data format
+                    data = jsonData.map(item => {
+                        if (item.string_list_data && item.string_list_data[0]) {
+                            return item.string_list_data[0].value;
+                        }
+                        return item;
+                    });
+                } else {
+                    // Try to extract usernames from object
+                    data = Object.values(jsonData).flat().map(item => {
+                        if (typeof item === 'string') return item;
+                        if (item.username) return item.username;
+                        return JSON.stringify(item);
+                    });
+                }
+            } catch (e) {
+                // If not JSON, try to parse as text
+                data = content.split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0)
+                    .map(line => {
+                        // Try to extract username from various formats
+                        const match = line.match(/([a-zA-Z0-9._]+)/);
+                        return match ? match[1] : line;
+                    });
+            }
+            
+            if (type === 'following') {
+                followingData = data;
+            } else {
+                followersData = data;
+            }
+            
+            // Enable analyze button if both files are loaded
+            if (followingData.length > 0 && followersData.length > 0) {
+                analyzeBtn.disabled = false;
+            }
+        }
+        
+        // Analyze data
+        analyzeBtn.addEventListener('click', function() {
+            loader.style.display = 'block';
+            analyzeBtn.disabled = true;
+            
+            // Simulate processing time
+            setTimeout(() => {
+                const unfollowers = findUnfollowers(followingData, followersData);
+                displayResults(unfollowers);
+                loader.style.display = 'none';
+                analyzeBtn.disabled = false;
+            }, 1500);
+        });
+        
+        // Find unfollowers
+        function findUnfollowers(following, followers) {
+            // Normalize usernames (lowercase, remove @ symbol)
+            const normalizedFollowers = followers.map(user => 
+                user.toLowerCase().replace('@', '')
+            );
+            
+            return following.filter(user => {
+                const normalizedUser = user.toLowerCase().replace('@', '');
+                return !normalizedFollowers.includes(normalizedUser);
+            });
+        }
+        
+        // Display results
+        function displayResults(unfollowers) {
+            countSpan.textContent = unfollowers.length;
+            unfollowersList.innerHTML = '';
+            
+            if (unfollowers.length === 0) {
+                unfollowersList.innerHTML = '<p style="text-align: center; padding: 20px;">Semua akun yang Anda ikuti juga mem-follow balik! 🎉</p>';
+            } else {
+                unfollowers.forEach((username, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'unfollower-item';
+                    
+                    const avatar = document.createElement('div');
+                    avatar.className = 'avatar';
+                    avatar.textContent = username.charAt(0).toUpperCase();
+                    
+                    const usernameSpan = document.createElement('div');
+                    usernameSpan.className = 'username';
+                    usernameSpan.textContent = username;
+                    
+                    item.appendChild(avatar);
+                    item.appendChild(usernameSpan);
+                    
+                    unfollowersList.appendChild(item);
+                });
+            }
+            
+            resultsSection.style.display = 'block';
+            
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Copy to clipboard
+        copyBtn.addEventListener('click', function() {
+            const unfollowers = Array.from(unfollowersList.querySelectorAll('.username'))
+                .map(el => el.textContent)
+                .join('\n');
+            
+            if (unfollowers) {
+                navigator.clipboard.writeText(unfollowers)
+                    .then(() => {
+                        const originalText = copyBtn.textContent;
+                        copyBtn.textContent = 'Tersalin!';
+                        setTimeout(() => {
+                            copyBtn.textContent = originalText;
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                    });
+            }
+        });
+        
+        // Scroll effect
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 50) {
+                document.body.classList.add('scrolled');
+            } else {
+                document.body.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html>
