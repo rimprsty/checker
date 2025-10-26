@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram Unfollower Checker Premium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         :root {
             --primary-color: #405DE6;
@@ -28,6 +29,10 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        html {
+            scroll-behavior: smooth;
         }
         
         body {
@@ -55,6 +60,10 @@
             text-align: center;
             position: relative;
             overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         header::before {
@@ -71,36 +80,71 @@
         .header-content {
             position: relative;
             z-index: 1;
+            max-width: 800px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         header h1 {
-            font-size: 2.8rem;
-            margin-bottom: 15px;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
         
         header p {
-            font-size: 1.2rem;
-            max-width: 600px;
-            margin: 0 auto;
+            font-size: 1.3rem;
+            margin: 0 auto 30px;
             opacity: 0.9;
+            max-width: 600px;
+        }
+        
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 1.5rem;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
         }
         
         .theme-toggle {
-            position: absolute;
+            position: fixed;
             top: 20px;
             right: 20px;
             background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
         }
         
         .theme-toggle:hover {
@@ -109,7 +153,7 @@
         }
         
         .instructions {
-            padding: 40px 0;
+            padding: 100px 0;
             background-color: inherit;
             transition: background-color 0.5s ease;
         }
@@ -118,10 +162,18 @@
             max-width: 800px;
             margin: 0 auto;
             background-color: var(--card-bg);
-            border-radius: 15px;
-            padding: 30px;
+            border-radius: 20px;
+            padding: 40px;
             box-shadow: var(--card-shadow);
             transition: all 0.3s ease;
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        
+        .instructions-content.animate {
+            transform: translateY(0);
+            opacity: 1;
+            transition: all 0.8s ease;
         }
         
         body.dark-mode .instructions-content {
@@ -133,6 +185,7 @@
             margin-bottom: 20px;
             text-align: center;
             color: var(--primary-color);
+            font-size: 2.2rem;
         }
         
         .steps {
@@ -146,10 +199,17 @@
             flex: 1;
             min-width: 200px;
             text-align: center;
-            padding: 25px 15px;
-            border-radius: 10px;
+            padding: 30px 15px;
+            border-radius: 15px;
             background: linear-gradient(135deg, #f5f7fa, #e4e8f0);
             transition: all 0.3s ease;
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        
+        .step.animate {
+            transform: translateY(0);
+            opacity: 1;
         }
         
         body.dark-mode .step {
@@ -157,25 +217,26 @@
         }
         
         .step:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
         }
         
         .step-number {
             display: inline-block;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             color: white;
             border-radius: 50%;
-            line-height: 40px;
+            line-height: 50px;
             margin-bottom: 15px;
             font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-size: 1.2rem;
         }
         
         .upload-section {
-            padding: 60px 0;
+            padding: 100px 0;
             background-color: inherit;
             transition: background-color 0.5s ease;
         }
@@ -192,14 +253,22 @@
             min-width: 300px;
             background-color: var(--card-bg);
             border: 2px dashed rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
-            padding: 40px 20px;
+            border-radius: 20px;
+            padding: 50px 20px;
             text-align: center;
             transition: all 0.3s ease;
             cursor: pointer;
             box-shadow: var(--card-shadow);
             position: relative;
             overflow: hidden;
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        
+        .upload-box.animate {
+            transform: translateY(0);
+            opacity: 1;
+            transition: all 0.8s ease;
         }
         
         body.dark-mode .upload-box {
@@ -209,9 +278,9 @@
         }
         
         .upload-box:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px);
             border-color: var(--primary-color);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
         
         .upload-box.active {
@@ -224,7 +293,7 @@
         }
         
         .upload-box i {
-            font-size: 3rem;
+            font-size: 4rem;
             margin-bottom: 20px;
             background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             -webkit-background-clip: text;
@@ -233,24 +302,26 @@
         
         .upload-box h3 {
             margin-bottom: 15px;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
         }
         
         .upload-box p {
             margin-bottom: 20px;
             opacity: 0.7;
+            font-size: 1.1rem;
         }
         
         .upload-btn {
             background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 15px 30px;
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 600;
             box-shadow: 0 4px 15px rgba(64, 93, 230, 0.3);
+            font-size: 1.1rem;
         }
         
         .upload-btn:hover {
@@ -260,15 +331,15 @@
         
         .file-name {
             margin-top: 10px;
-            font-size: 0.9rem;
+            font-size: 1rem;
             opacity: 0.8;
         }
         
         .progress-bar {
             width: 100%;
-            height: 6px;
+            height: 8px;
             background-color: rgba(0, 0, 0, 0.1);
-            border-radius: 3px;
+            border-radius: 4px;
             margin-top: 15px;
             overflow: hidden;
             display: none;
@@ -287,18 +358,26 @@
         
         .analyze-section {
             text-align: center;
-            padding: 40px 0;
+            padding: 80px 0;
             background-color: inherit;
             transition: background-color 0.5s ease;
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        
+        .analyze-section.animate {
+            transform: translateY(0);
+            opacity: 1;
+            transition: all 0.8s ease;
         }
         
         .analyze-btn {
             background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             color: white;
             border: none;
-            padding: 15px 40px;
+            padding: 20px 50px;
             border-radius: 50px;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -323,8 +402,8 @@
         }
         
         .analyze-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(64, 93, 230, 0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(64, 93, 230, 0.5);
         }
         
         .analyze-btn:disabled {
@@ -339,10 +418,18 @@
         }
         
         .results-section {
-            padding: 60px 0;
+            padding: 100px 0;
             background-color: inherit;
             transition: background-color 0.5s ease;
             display: none;
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        
+        .results-section.animate {
+            transform: translateY(0);
+            opacity: 1;
+            transition: all 0.8s ease;
         }
         
         .results-container {
@@ -352,11 +439,11 @@
         
         .results-header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
         }
         
         .results-header h2 {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             margin-bottom: 10px;
             background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             -webkit-background-clip: text;
@@ -367,19 +454,26 @@
             display: flex;
             justify-content: center;
             gap: 20px;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
             flex-wrap: wrap;
         }
         
         .stat-card {
             background: var(--card-bg);
-            border-radius: 15px;
-            padding: 25px;
+            border-radius: 20px;
+            padding: 30px;
             text-align: center;
             box-shadow: var(--card-shadow);
             transition: all 0.3s ease;
             flex: 1;
             min-width: 200px;
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        
+        .stat-card.animate {
+            transform: translateY(0);
+            opacity: 1;
         }
         
         body.dark-mode .stat-card {
@@ -388,29 +482,29 @@
         }
         
         .stat-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px);
         }
         
         .stat-card.following {
-            border-top: 4px solid var(--primary-color);
+            border-top: 5px solid var(--primary-color);
         }
         
         .stat-card.followers {
-            border-top: 4px solid var(--accent-color-2);
+            border-top: 5px solid var(--accent-color-2);
         }
         
         .stat-card.unfollowers {
-            border-top: 4px solid var(--accent-color);
+            border-top: 5px solid var(--accent-color);
         }
         
         .stat-card.fans {
-            border-top: 4px solid var(--accent-color-3);
+            border-top: 5px solid var(--accent-color-3);
         }
         
         .stat-number {
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: 700;
-            margin: 10px 0;
+            margin: 15px 0;
         }
         
         .stat-card.following .stat-number {
@@ -447,6 +541,7 @@
             transition: all 0.3s ease;
             border-bottom: 3px solid transparent;
             position: relative;
+            font-size: 1.1rem;
         }
         
         .tab.active {
@@ -462,7 +557,7 @@
             color: white;
             border-radius: 10px;
             padding: 2px 8px;
-            font-size: 0.7rem;
+            font-size: 0.8rem;
         }
         
         .tab-content {
@@ -482,7 +577,7 @@
         .unfollowers-list, .fans-list {
             max-height: 500px;
             overflow-y: auto;
-            border-radius: 10px;
+            border-radius: 15px;
             background-color: var(--card-bg);
             padding: 20px;
             box-shadow: var(--card-shadow);
@@ -497,7 +592,7 @@
         .user-item {
             display: flex;
             align-items: center;
-            padding: 15px;
+            padding: 20px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             transition: background-color 0.3s ease;
             animation: slideIn 0.5s ease;
@@ -514,7 +609,7 @@
         
         .user-item:hover {
             background-color: rgba(0, 0, 0, 0.03);
-            border-radius: 8px;
+            border-radius: 10px;
         }
         
         body.dark-mode .user-item:hover {
@@ -526,18 +621,18 @@
         }
         
         .avatar {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            margin-right: 15px;
+            margin-right: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             color: white;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
         
         .user-info {
@@ -547,12 +642,13 @@
         .username {
             font-weight: 600;
             margin-bottom: 5px;
+            font-size: 1.2rem;
         }
         
         .user-stats {
             display: flex;
             gap: 15px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             opacity: 0.7;
         }
         
@@ -565,11 +661,11 @@
             background: transparent;
             border: 1px solid var(--primary-color);
             color: var(--primary-color);
-            padding: 6px 12px;
+            padding: 8px 15px;
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
         
         .action-btn:hover {
@@ -581,7 +677,7 @@
             background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 25px;
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -590,10 +686,11 @@
             align-items: center;
             gap: 8px;
             margin: 20px auto 0;
+            font-size: 1.1rem;
         }
         
         .copy-btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(64, 93, 230, 0.4);
         }
         
@@ -607,8 +704,8 @@
             border: 4px solid rgba(0, 0, 0, 0.1);
             border-radius: 50%;
             border-top: 4px solid var(--primary-color);
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
@@ -634,6 +731,8 @@
             z-index: 1000;
             transform: translateX(150%);
             transition: transform 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
         .notification.show {
@@ -650,7 +749,7 @@
         
         footer {
             background-color: inherit;
-            padding: 30px 0;
+            padding: 40px 0;
             text-align: center;
             border-top: 1px solid rgba(0, 0, 0, 0.1);
             transition: background-color 0.5s ease, color 0.5s ease;
@@ -663,11 +762,21 @@
         footer p {
             opacity: 0.7;
             margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .copyright {
+            margin-top: 20px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
         @media (max-width: 768px) {
             header h1 {
-                font-size: 2rem;
+                font-size: 2.5rem;
             }
             
             .upload-container {
@@ -707,65 +816,57 @@
                 </button>
                 <h1>Instagram Unfollower Checker Premium</h1>
                 <p>Temukan siapa yang tidak mem-follow balik dan siapa yang unfollow Anda dengan analisis mendalam</p>
+                <button class="upload-btn" id="get-started-btn">Mulai Sekarang</button>
             </div>
+        </div>
+        <div class="scroll-indicator">
+            <i class="fas fa-chevron-down"></i>
         </div>
     </header>
     
-    <section class="instructions">
+    <section class="instructions" id="instructions">
         <div class="container">
-            <div class="instructions-content">
+            <div class="instructions-content" id="instructions-content">
                 <h2>Cara Menggunakan</h2>
                 <p>Website ini akan menganalisis data Instagram Anda untuk menemukan akun yang tidak mem-follow balik dan yang telah unfollow Anda.</p>
                 
                 <div class="steps">
-                    <div class="step">
+                    <div class="step" id="step1">
                         <div class="step-number">1</div>
                         <h3>Request Data Instagram</h3>
                         <p>Pergi ke Instagram → Settings → Privacy and Security → Download Data</p>
                     </div>
-                    <div class="step">
+                    <div class="step" id="step2">
                         <div class="step-number">2</div>
                         <h3>Tunggu Email</h3>
                         <p>Instagram akan mengirimkan link download data Anda via email</p>
                     </div>
-                    <div class="step">
+                    <div class="step" id="step3">
                         <div class="step-number">3</div>
-                        <h3>Download & Ekstrak</h3>
-                        <p>Download file ZIP dari Instagram dan ekstrak untuk mendapatkan file JSON</p>
+                        <h3>Download ZIP</h3>
+                        <p>Download file ZIP dari Instagram (tidak perlu diekstrak)</p>
                     </div>
-                    <div class="step">
+                    <div class="step" id="step4">
                         <div class="step-number">4</div>
-                        <h3>Upload File</h3>
-                        <p>Upload file <code>followers_1.json</code> dan <code>following.json</code> di bawah ini</p>
+                        <h3>Upload File ZIP</h3>
+                        <p>Upload file ZIP yang telah didownload di bawah ini</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
     
-    <section class="upload-section">
+    <section class="upload-section" id="upload-section">
         <div class="container">
             <div class="upload-container">
-                <div class="upload-box" id="following-box">
-                    <i class="fas fa-user-plus"></i>
-                    <h3>Following</h3>
-                    <p>Unggah file <code>following.json</code> dari data Instagram Anda</p>
-                    <input type="file" id="following-file" accept=".json" hidden>
-                    <button class="upload-btn" id="following-btn">Pilih File</button>
-                    <div class="file-name" id="following-name">Belum ada file dipilih</div>
-                    <div class="progress-bar" id="following-progress">
-                        <div class="progress"></div>
-                    </div>
-                </div>
-                
-                <div class="upload-box" id="followers-box">
-                    <i class="fas fa-users"></i>
-                    <h3>Followers</h3>
-                    <p>Unggah file <code>followers_1.json</code> dari data Instagram Anda</p>
-                    <input type="file" id="followers-file" accept=".json" hidden>
-                    <button class="upload-btn" id="followers-btn">Pilih File</button>
-                    <div class="file-name" id="followers-name">Belum ada file dipilih</div>
-                    <div class="progress-bar" id="followers-progress">
+                <div class="upload-box" id="upload-box">
+                    <i class="fas fa-file-archive"></i>
+                    <h3>Upload File ZIP Instagram</h3>
+                    <p>Unggah file ZIP yang Anda dapatkan dari Instagram. Sistem akan otomatis mencari file following.json dan followers_1.json</p>
+                    <input type="file" id="zip-file" accept=".zip" hidden>
+                    <button class="upload-btn" id="zip-btn">Pilih File ZIP</button>
+                    <div class="file-name" id="zip-name">Belum ada file dipilih</div>
+                    <div class="progress-bar" id="zip-progress">
                         <div class="progress"></div>
                     </div>
                 </div>
@@ -773,7 +874,7 @@
         </div>
     </section>
     
-    <section class="analyze-section">
+    <section class="analyze-section" id="analyze-section">
         <div class="container">
             <button class="analyze-btn" id="analyze-btn" disabled>
                 <i class="fas fa-chart-line"></i> Analisis Data
@@ -794,22 +895,22 @@
                 </div>
                 
                 <div class="stats-container">
-                    <div class="stat-card following">
+                    <div class="stat-card following" id="stat-following">
                         <i class="fas fa-user-plus"></i>
                         <div class="stat-number" id="following-count">0</div>
                         <p>Mengikuti</p>
                     </div>
-                    <div class="stat-card followers">
+                    <div class="stat-card followers" id="stat-followers">
                         <i class="fas fa-users"></i>
                         <div class="stat-number" id="followers-count">0</div>
                         <p>Pengikut</p>
                     </div>
-                    <div class="stat-card unfollowers">
+                    <div class="stat-card unfollowers" id="stat-unfollowers">
                         <i class="fas fa-user-times"></i>
                         <div class="stat-number" id="unfollowers-count">0</div>
                         <p>Tidak Follow Balik</p>
                     </div>
-                    <div class="stat-card fans">
+                    <div class="stat-card fans" id="stat-fans">
                         <i class="fas fa-heart"></i>
                         <div class="stat-number" id="fans-count">0</div>
                         <p>Fans (Anda Tidak Follow)</p>
@@ -850,8 +951,8 @@
     
     <footer>
         <div class="container">
-            <p>Instagram Unfollower Checker Premium &copy; 2023</p>
             <p>Website ini tidak terafiliasi dengan Instagram. Data Anda diproses secara lokal di browser.</p>
+            <div class="copyright">© Rimba Putra | 2025</div>
         </div>
     </footer>
 
@@ -860,14 +961,11 @@
     <script>
         // Elements
         const themeToggle = document.getElementById('theme-toggle');
-        const followingFileInput = document.getElementById('following-file');
-        const followersFileInput = document.getElementById('followers-file');
-        const followingBtn = document.getElementById('following-btn');
-        const followersBtn = document.getElementById('followers-btn');
-        const followingName = document.getElementById('following-name');
-        const followersName = document.getElementById('followers-name');
-        const followingProgress = document.getElementById('following-progress');
-        const followersProgress = document.getElementById('followers-progress');
+        const getStartedBtn = document.getElementById('get-started-btn');
+        const zipFileInput = document.getElementById('zip-file');
+        const zipBtn = document.getElementById('zip-btn');
+        const zipName = document.getElementById('zip-name');
+        const zipProgress = document.getElementById('zip-progress');
         const analyzeBtn = document.getElementById('analyze-btn');
         const loader = document.getElementById('loader');
         const resultsSection = document.getElementById('results-section');
@@ -913,34 +1011,28 @@
             }
         });
         
-        // Event listeners for file upload buttons
-        followingBtn.addEventListener('click', () => followingFileInput.click());
-        followersBtn.addEventListener('click', () => followersFileInput.click());
-        
-        // Handle file selection
-        followingFileInput.addEventListener('change', function(e) {
-            if (this.files.length > 0) {
-                followingName.textContent = this.files[0].name;
-                document.getElementById('following-box').classList.add('active');
-                readFile(this.files[0], 'following');
-            }
+        // Get started button
+        getStartedBtn.addEventListener('click', function() {
+            document.getElementById('instructions').scrollIntoView({ behavior: 'smooth' });
         });
         
-        followersFileInput.addEventListener('change', function(e) {
+        // Event listeners for file upload buttons
+        zipBtn.addEventListener('click', () => zipFileInput.click());
+        
+        // Handle file selection
+        zipFileInput.addEventListener('change', function(e) {
             if (this.files.length > 0) {
-                followersName.textContent = this.files[0].name;
-                document.getElementById('followers-box').classList.add('active');
-                readFile(this.files[0], 'followers');
+                zipName.textContent = this.files[0].name;
+                document.getElementById('upload-box').classList.add('active');
+                readZipFile(this.files[0]);
             }
         });
         
         // Drag and drop functionality
-        const followingBox = document.getElementById('following-box');
-        const followersBox = document.getElementById('followers-box');
+        const uploadBox = document.getElementById('upload-box');
         
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            followingBox.addEventListener(eventName, preventDefaults, false);
-            followersBox.addEventListener(eventName, preventDefaults, false);
+            uploadBox.addEventListener(eventName, preventDefaults, false);
         });
         
         function preventDefaults(e) {
@@ -949,43 +1041,32 @@
         }
         
         ['dragenter', 'dragover'].forEach(eventName => {
-            followingBox.addEventListener(eventName, highlight, false);
-            followersBox.addEventListener(eventName, highlight, false);
+            uploadBox.addEventListener(eventName, highlight, false);
         });
         
         ['dragleave', 'drop'].forEach(eventName => {
-            followingBox.addEventListener(eventName, unhighlight, false);
-            followersBox.addEventListener(eventName, unhighlight, false);
+            uploadBox.addEventListener(eventName, unhighlight, false);
         });
         
         function highlight(e) {
-            this.classList.add('highlight');
+            uploadBox.classList.add('highlight');
         }
         
         function unhighlight(e) {
-            this.classList.remove('highlight');
+            uploadBox.classList.remove('highlight');
         }
         
-        followingBox.addEventListener('drop', handleDrop, false);
-        followersBox.addEventListener('drop', handleDrop, false);
+        uploadBox.addEventListener('drop', handleDrop, false);
         
         function handleDrop(e) {
             const dt = e.dataTransfer;
             const files = dt.files;
-            const boxId = this.id;
             
             if (files.length > 0) {
-                if (boxId === 'following-box') {
-                    followingFileInput.files = files;
-                    followingName.textContent = files[0].name;
-                    document.getElementById('following-box').classList.add('active');
-                    readFile(files[0], 'following');
-                } else {
-                    followersFileInput.files = files;
-                    followersName.textContent = files[0].name;
-                    document.getElementById('followers-box').classList.add('active');
-                    readFile(files[0], 'followers');
-                }
+                zipFileInput.files = files;
+                zipName.textContent = files[0].name;
+                document.getElementById('upload-box').classList.add('active');
+                readZipFile(files[0]);
             }
         }
         
@@ -1002,13 +1083,12 @@
             });
         });
         
-        // Read file content
-        function readFile(file, type) {
+        // Read ZIP file content
+        function readZipFile(file) {
             const reader = new FileReader();
-            const progressBar = type === 'following' ? followingProgress : followersProgress;
-            const progress = progressBar.querySelector('.progress');
+            const progress = zipProgress.querySelector('.progress');
             
-            progressBar.style.display = 'block';
+            zipProgress.style.display = 'block';
             progress.style.width = '0%';
             
             reader.onloadstart = function() {
@@ -1024,67 +1104,105 @@
             
             reader.onload = function(e) {
                 progress.style.width = '100%';
-                setTimeout(() => {
-                    progressBar.style.display = 'none';
-                }, 500);
                 
-                const content = e.target.result;
-                parseFileContent(content, type);
+                // Process ZIP file
+                processZipFile(e.target.result);
             };
             
             reader.onerror = function() {
-                progressBar.style.display = 'none';
-                showNotification('Error membaca file', 'error');
+                zipProgress.style.display = 'none';
+                showNotification('Error membaca file ZIP', 'error');
             };
             
-            reader.readAsText(file);
+            reader.readAsArrayBuffer(file);
         }
         
-        // Parse file content
-        function parseFileContent(content, type) {
+        // Process ZIP file
+        async function processZipFile(data) {
             try {
-                const jsonData = JSON.parse(content);
-                let data = [];
+                const zip = await JSZip.loadAsync(data);
+                let followingFile = null;
+                let followersFile = null;
                 
-                // Parse data berdasarkan struktur JSON yang diberikan
-                if (type === 'following') {
-                    // Format following: relationships_following array
-                    if (jsonData.relationships_following && Array.isArray(jsonData.relationships_following)) {
-                        data = jsonData.relationships_following.map(item => ({
-                            username: item.title || (item.string_list_data && item.string_list_data[0] && item.string_list_data[0].value) || 'Unknown',
-                            timestamp: item.string_list_data && item.string_list_data[0] && item.string_list_data[0].timestamp
-                        }));
-                    } else {
-                        showNotification('Format file following tidak valid', 'error');
-                        return;
+                // Search for following.json and followers_1.json in the ZIP
+                zip.forEach((relativePath, file) => {
+                    if (relativePath.includes('following.json') && !file.dir) {
+                        followingFile = file;
                     }
-                } else {
-                    // Format followers: array of objects
-                    if (Array.isArray(jsonData)) {
-                        data = jsonData.map(item => ({
-                            username: item.string_list_data && item.string_list_data[0] && item.string_list_data[0].value || 'Unknown',
-                            timestamp: item.string_list_data && item.string_list_data[0] && item.string_list_data[0].timestamp
-                        }));
-                    } else {
-                        showNotification('Format file followers tidak valid', 'error');
-                        return;
+                    if (relativePath.includes('followers_1.json') && !file.dir) {
+                        followersFile = file;
                     }
+                });
+                
+                if (!followingFile && !followersFile) {
+                    showNotification('File following.json atau followers_1.json tidak ditemukan dalam ZIP', 'error');
+                    return;
                 }
                 
-                if (type === 'following') {
-                    followingData = data;
-                    showNotification(`Data following berhasil diunggah (${data.length} akun)`, 'success');
+                // Parse following data
+                if (followingFile) {
+                    const followingContent = await followingFile.async('text');
+                    parseFollowingData(followingContent);
                 } else {
-                    followersData = data;
-                    showNotification(`Data followers berhasil diunggah (${data.length} akun)`, 'success');
+                    showNotification('File following.json tidak ditemukan', 'error');
+                }
+                
+                // Parse followers data
+                if (followersFile) {
+                    const followersContent = await followersFile.async('text');
+                    parseFollowersData(followersContent);
+                } else {
+                    showNotification('File followers_1.json tidak ditemukan', 'error');
                 }
                 
                 // Enable analyze button if both files are loaded
                 if (followingData.length > 0 && followersData.length > 0) {
                     analyzeBtn.disabled = false;
+                    showNotification('File ZIP berhasil diproses. Klik "Analisis Data" untuk melihat hasil.', 'success');
+                }
+                
+                setTimeout(() => {
+                    zipProgress.style.display = 'none';
+                }, 500);
+            } catch (e) {
+                showNotification('Error memproses file ZIP: ' + e.message, 'error');
+                zipProgress.style.display = 'none';
+            }
+        }
+        
+        // Parse following data
+        function parseFollowingData(content) {
+            try {
+                const jsonData = JSON.parse(content);
+                
+                if (jsonData.relationships_following && Array.isArray(jsonData.relationships_following)) {
+                    followingData = jsonData.relationships_following.map(item => ({
+                        username: item.title || (item.string_list_data && item.string_list_data[0] && item.string_list_data[0].value) || 'Unknown',
+                        timestamp: item.string_list_data && item.string_list_data[0] && item.string_list_data[0].timestamp
+                    }));
+                } else {
+                    showNotification('Format file following tidak valid', 'error');
                 }
             } catch (e) {
-                showNotification('Error parsing file JSON: ' + e.message, 'error');
+                showNotification('Error parsing file following: ' + e.message, 'error');
+            }
+        }
+        
+        // Parse followers data
+        function parseFollowersData(content) {
+            try {
+                const jsonData = JSON.parse(content);
+                
+                if (Array.isArray(jsonData)) {
+                    followersData = jsonData.map(item => ({
+                        username: item.string_list_data && item.string_list_data[0] && item.string_list_data[0].value || 'Unknown',
+                        timestamp: item.string_list_data && item.string_list_data[0] && item.string_list_data[0].timestamp
+                    }));
+                } else {
+                    showNotification('Format file followers tidak valid', 'error');
+                }
+            } catch (e) {
+                showNotification('Error parsing file followers: ' + e.message, 'error');
             }
         }
         
@@ -1171,6 +1289,20 @@
             
             // Scroll to results
             resultsSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Animate stats cards
+            setTimeout(() => {
+                document.getElementById('stat-following').classList.add('animate');
+            }, 100);
+            setTimeout(() => {
+                document.getElementById('stat-followers').classList.add('animate');
+            }, 200);
+            setTimeout(() => {
+                document.getElementById('stat-unfollowers').classList.add('animate');
+            }, 300);
+            setTimeout(() => {
+                document.getElementById('stat-fans').classList.add('animate');
+            }, 400);
         }
         
         // Create user item
@@ -1274,6 +1406,56 @@
             }, 3000);
         }
         
+        // Scroll animations
+        function checkScroll() {
+            const instructionsContent = document.getElementById('instructions-content');
+            const steps = document.querySelectorAll('.step');
+            const uploadBox = document.getElementById('upload-box');
+            const analyzeSection = document.getElementById('analyze-section');
+            const resultsSection = document.getElementById('results-section');
+            
+            // Instructions section
+            if (isElementInViewport(instructionsContent)) {
+                instructionsContent.classList.add('animate');
+                
+                // Animate steps with delay
+                steps.forEach((step, index) => {
+                    setTimeout(() => {
+                        step.classList.add('animate');
+                    }, index * 200);
+                });
+            }
+            
+            // Upload section
+            if (isElementInViewport(uploadBox)) {
+                uploadBox.classList.add('animate');
+            }
+            
+            // Analyze section
+            if (isElementInViewport(analyzeSection)) {
+                analyzeSection.classList.add('animate');
+            }
+            
+            // Results section
+            if (isElementInViewport(resultsSection) && resultsSection.style.display !== 'none') {
+                resultsSection.classList.add('animate');
+            }
+        }
+        
+        // Check if element is in viewport
+        function isElementInViewport(el) {
+            if (!el) return false;
+            const rect = el.getBoundingClientRect();
+            return (
+                rect.top <= (window.innerHeight || document.documentElement.clientHeight) * 0.9 &&
+                rect.bottom >= 0
+            );
+        }
+        
+        // Listen for scroll events
+        window.addEventListener('scroll', checkScroll);
+        window.addEventListener('load', checkScroll);
+        
         // Demo data (untuk testing)
         function loadDemoData() {
             // Data following demo
@@ -1282,7 +1464,10 @@
                 { username: "user2", timestamp: 1620000000 },
                 { username: "user3", timestamp: 1620000000 },
                 { username: "user4", timestamp: 1620000000 },
-                { username: "user5", timestamp: 1620000000 }
+                { username: "user5", timestamp: 1620000000 },
+                { username: "user6", timestamp: 1620000000 },
+                { username: "user7", timestamp: 1620000000 },
+                { username: "user8", timestamp: 1620000000 }
             ];
             
             // Data followers demo
@@ -1291,17 +1476,16 @@
                 { username: "user2", timestamp: 1620000000 },
                 { username: "user3", timestamp: 1620000000 },
                 { username: "user6", timestamp: 1620000000 },
-                { username: "user7", timestamp: 1620000000 }
+                { username: "user7", timestamp: 1620000000 },
+                { username: "user9", timestamp: 1620000000 },
+                { username: "user10", timestamp: 1620000000 }
             ];
             
             followingData = followingDemo;
             followersData = followersDemo;
             
-            followingName.textContent = "following_demo.json";
-            followersName.textContent = "followers_demo.json";
-            
-            document.getElementById('following-box').classList.add('active');
-            document.getElementById('followers-box').classList.add('active');
+            zipName.textContent = "instagram_data_demo.zip";
+            document.getElementById('upload-box').classList.add('active');
             
             analyzeBtn.disabled = false;
             
